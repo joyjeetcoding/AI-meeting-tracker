@@ -1,0 +1,28 @@
+# Don't copy these into the Docker image
+
+# Virtual environment - Docker builds its own
+myenv/
+venv/
+.venv/
+
+# Local env file - use Docker env vars instead
+.env
+
+# Data - will be mounted as a volume
+data/
+
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
