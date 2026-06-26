@@ -6,7 +6,6 @@ class Meeting(SQLModel, table=True):
     """A single uploaded meeting (audio or text)."""
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str
-    title: str
     original_filename: str
     input_type: str                       # "audio" | "text"
     file_path: str                        # where the raw file is saved

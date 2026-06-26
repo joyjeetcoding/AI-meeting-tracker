@@ -31,7 +31,7 @@ async def save_file(relative_path: str, content: str) -> str:
     Save text content to a file via Filesystem MCP.
     Returns the absolute path where the file was saved.
     """
-    abs_path = str(Path(settings.MCP_FILESYSTEM_ROOT) / relative_path)
+    abs_path = str(Path(settings.MCP_FILESYSTEM_ROOT)/relative_path)
 
     async with stdio_client(SERVER_PARAMS) as (read, write):
         async with ClientSession(read, write) as session:
@@ -45,7 +45,7 @@ async def save_file(relative_path: str, content: str) -> str:
 
 async def read_file(relative_path: str) -> str:
     """Read a file's contents via Filesystem MCP."""
-    abs_path = str(Path(settings.MCP_FILESYSTEM_ROOT) / relative_path)
+    abs_path = str(Path(settings.MCP_FILESYSTEM_ROOT)/relative_path)
 
     async with stdio_client(SERVER_PARAMS) as (read, write):
         async with ClientSession(read, write) as session:
@@ -59,7 +59,7 @@ async def read_file(relative_path: str) -> str:
 
 async def list_files(subdirectory: str = "") -> list[str]:
     """List all files in a subdirectory via Filesystem MCP."""
-    target = str(Path(settings.MCP_FILESYSTEM_ROOT) / subdirectory)
+    target = str(Path(settings.MCP_FILESYSTEM_ROOT)/subdirectory)
 
     async with stdio_client(SERVER_PARAMS) as (read, write):
         async with ClientSession(read, write) as session:
