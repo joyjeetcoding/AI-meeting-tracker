@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     ENV: str = "local"
 
     # Ollama
-    OLLAMA_BASE_URL: str = "http://ollama:11434"
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_LLM_MODEL: str = "mistral"
     OLLAMA_SUMMARY_MODEL: str = "llama3.2"
 
@@ -15,15 +15,15 @@ class Settings(BaseSettings):
     HF_SUMMARY_MODEL: str = "Qwen/Qwen2.5-7B-Instruct"
 
     # Storage
-    DATA_DIR: str = "./data"
-    MEETINGS_DIR: str = "./data/meetings"
-    TRANSCRIPTS_DIR: str = "./data/transcripts"
-    OUTPUTS_DIR: str = "./data/outputs"
-    SQLITE_DB_PATH: str = "./data/meetings.db"
+    DATA_DIR: str = str(Path("./data").resolve())
+    MEETINGS_DIR: str = str(Path("./data/meetings").resolve())
+    TRANSCRIPTS_DIR: str = str(Path("./data/transcripts").resolve())
+    OUTPUTS_DIR: str = str(Path("./data/outputs").resolve())
+    SQLITE_DB_PATH: str = str(Path("./data/meetings.db").resolve())
 
     # MCP
-    MCP_FILESYSTEM_ROOT: str = "./data"
-    MCP_SQLITE_DB_PATH: str = "./data/meetings.db"
+    MCP_FILESYSTEM_ROOT: str = str(Path("./data").resolve())
+    MCP_SQLITE_DB_PATH: str = str(Path("./data/meetings.db").resolve())
 
     class Config:
         env_file = ".env"
@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     
     def ensure_dirs(self):
         """Creates all data directories if they don't exist."""
-        for d in [self.MEETINGS_DIR, self.TRANSCRIPTS_DIR, self.OUTPUTS_DIR]:
+        for d in [self.DATA_DIR, self.MEETINGS_DIR, self.TRANSCRIPTS_DIR, self.OUTPUTS_DIR]:
             Path(d).mkdir(parents=True, exist_ok=True)
 
 settings = Settings()

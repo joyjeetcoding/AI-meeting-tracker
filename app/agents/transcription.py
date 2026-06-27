@@ -43,6 +43,12 @@ async def transcribe(audio_path: str, meeting_id: int) -> str:
     result = model.transcribe(audio_path, fp16=False)
     transcript = result["text"].strip()
 
+    print("\n" + "=" * 70)
+    print("[TranscriptionAgent] Transcript")
+    print("=" * 70)
+    print(transcript)
+    print("=" * 70 + "\n")
+
     print(f"[TranscriptionAgent] Transcribed {len(transcript)} characters")
 
     # Step 2: Save transcript via Filesystem MCP

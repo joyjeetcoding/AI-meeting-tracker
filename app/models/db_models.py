@@ -1,6 +1,6 @@
-from datetime import datetime
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
+from datetime import datetime, timezone
 
 class Meeting(SQLModel, table=True):
     """A single uploaded meeting (audio or text)."""
@@ -12,7 +12,8 @@ class Meeting(SQLModel, table=True):
     transcript: Optional[str] = None      # raw text (from Whisper or user input)
     summary: Optional[str] = None   # LLM generated summary
     status: str = Field(default="pending")
-    created_at: datetime = Field(default_factory=datetime.timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 
     action_items: List["ActionItem"] = Relationship(back_populates="meeting")
 
@@ -25,7 +26,7 @@ class ActionItem(SQLModel, table=True):
     priority: str = Field(default="Medium")   # High | Medium | Low
     deadline: Optional[str] = None
     status: str = Field(default="open")       # open | in_progress | done
-    created_at: datetime = Field(default_factory=datetime.timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     meeting: Optional[Meeting] = Relationship(back_populates="action_items")
 
 # ── API Response Schemas ──────────────────────────────────────
