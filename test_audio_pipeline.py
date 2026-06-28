@@ -7,7 +7,9 @@ from app.models.database import create_db_and_tables, engine
 from app.models.db_models import Meeting
 from app.agents.pipeline import run_pipeline
 from app.config import settings
+
 settings.ensure_dirs()
+
 
 async def main():
 
@@ -19,11 +21,12 @@ async def main():
     print("✅ Database and tables are ready.\n")
 
     # --------------------------------------------------
-    # Step 2: Read meeting notes from file
+    # Step 2: Audio file path
     # --------------------------------------------------
-    notes = Path("data/meeting_notes.txt").read_text(
-        encoding="utf-8"
-    )
+    audio_path = "data/team_meeting.mp4"
+
+    if not Path(audio_path).exists():
+        raise FileNotFoundError(audio_path)
 
     # --------------------------------------------------
     # Step 3: Insert Meeting
@@ -31,11 +34,10 @@ async def main():
     with Session(engine) as session:
 
         meeting = Meeting(
-            title="Sprint Planning Meeting",
-            original_filename="meeting_notes.txt",
-            input_type="text",
-            file_path="data/meeting_notes.txt",
-            transcript=notes,
+            title="Audio Meeting Test",
+            original_filename="team_meeting.mp4",
+            input_type="audio",
+            file_path=audio_path,
         )
 
         session.add(meeting)
@@ -50,20 +52,15 @@ async def main():
     # --------------------------------------------------
     # Step 4: Run Pipeline
     # --------------------------------------------------
-    print("=" * 70)
-    print("Running AI Pipeline...")
-    print("=" * 70)
-
     result = await run_pipeline(
         meeting_id=meeting_id,
-        audio_path=None,      # Text input → Skip transcription
+        audio_path=audio_path,
     )
 
     # --------------------------------------------------
     # Step 5: Print Final Result
     # --------------------------------------------------
-    print("\n")
-    print("=" * 70)
+    print("\n" + "=" * 70)
     print("FINAL RESULT")
     print("=" * 70)
 
@@ -75,13 +72,8 @@ async def main():
 
     print("\nACTION ITEMS\n")
 
-    for i, item in enumerate(result["action_items"], start=1):
-        print(f"Action {i}")
-        print(f"Task      : {item['task']}")
-        print(f"Owner     : {item['owner']}")
-        print(f"Priority  : {item['priority']}")
-        print(f"Deadline  : {item['deadline']}")
-        print("-" * 40)
+    for item in result["action_items"]:
+        print(item)
 
 
 if __name__ == "__main__":

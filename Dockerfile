@@ -1,32 +1,41 @@
-FROM python:3.10-slim-bookworm
+FROM python:3.11-slim-bookworm
 
-# System dependencies
 RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
     ffmpeg \
     nodejs \
     npm \
+    git \
     curl \
+    build-essential \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install Python dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install git+https://github.com/openai/whisper.git
-RUN pip install -r requirements.txt --no-build-isolation
 
-# Copy application code
+RUN pip install --upgrade pip setuptools wheel
+
+# ── Install CPU-only torch first (prevents pip pulling 2GB CUDA wheel) ──
+RUN pip install torch==2.2.2+cpu --index-url https://download.pytorch.org/whl/cpu
+
+# ── Whisper (torch must already be installed before this) ──
+RUN pip install \
+    git+https://github.com/openai/whisper.git@04f449b8a437f1bbd3dba5c9f826aca972e7709a \
+    --no-build-isolation
+
+# ── Everything else (torch already satisfied, won't be re-downloaded) ──
+RUN pip install -r requirements.txt \
+    --extra-index-url https://download.pytorch.org/whl/cpu \
+    --no-build-isolation
+
 COPY . .
 
-# Create data directories
 RUN mkdir -p data/meetings data/transcripts data/outputs
 
-# HF Spaces runs as non-root user - fix permissions
 RUN chmod -R 777 data/
 
-# HF Spaces expects the app on port 7860
 EXPOSE 7860
 
-# On HF Spaces we run both FastAPI + Gradio via this script
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000 & python gradio_ui.py"]

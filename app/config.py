@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     ENV: str = "local"
 
     # Ollama
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_BASE_URL: str = "http://ollama:11434"
     OLLAMA_LLM_MODEL: str = "mistral"
     OLLAMA_SUMMARY_MODEL: str = "llama3.2"
 

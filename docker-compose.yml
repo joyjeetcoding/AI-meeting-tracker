@@ -1,0 +1,73 @@
+# ── Local Dev Stack ───────────────────────────────────────────
+# Services:
+#   ollama   → LLM server (mistral + llama3.2)
+#   api      → FastAPI backend
+#   ui       → Gradio frontend
+#
+# First time setup after docker compose up --build:
+#   docker compose exec ollama ollama pull mistral
+#   docker compose exec ollama ollama pull llama3.2
+
+services:
+
+  # ── Ollama ──────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: meeting-tracker-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped
+
+  # ── FastAPI Backend ──────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: meeting-tracker-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./app:/app/app
+    environment:
+      - ENV=local
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_LLM_MODEL=mistral
+      - OLLAMA_SUMMARY_MODEL=llama3.2
+      - SQLITE_DB_PATH=/app/data/meetings.db
+      - MCP_FILESYSTEM_ROOT=/app/data
+      - MCP_SQLITE_DB_PATH=/app/data/meetings.db
+      - DATA_DIR=/app/data
+      - MEETINGS_DIR=/app/data/meetings
+      - TRANSCRIPTS_DIR=/app/data/transcripts
+      - OUTPUTS_DIR=/app/data/outputs
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ── Gradio UI ────────────────────────────────────────────────
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: meeting-tracker-ui
+    ports:
+      - "7860:7860"
+    environment:
+      - BACKEND_URL=http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+    command: python gradio_ui.py
+
+volumes:
+  ollama_data:
